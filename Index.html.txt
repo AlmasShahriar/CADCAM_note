@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPE-409 CAD/CAM — Complete Study Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #141820;
+    --surface2: #1c2130;
+    --border: #252d3d;
+    --accent: #4fc3f7;
+    --accent2: #f9a825;
+    --accent3: #69f0ae;
+    --accent4: #ef5350;
+    --text: #e8eaf0;
+    --text-muted: #8892a4;
+    --text-dim: #556070;
+    --heading-font: 'Playfair Display', serif;
+    --body-font: 'IBM Plex Sans', sans-serif;
+    --mono-font: 'IBM Plex Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body-font);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    padding: 4rem 2rem;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,195,247,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,195,247,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridMove 20s linear infinite;
+  }
+
+  @keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 60px 60px; }
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,195,247,0.12) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 900px; }
+
+  .hero-badge {
+    display: inline-block;
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    background: rgba(79,195,247,0.1);
+    border: 1px solid rgba(79,195,247,0.25);
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero h1 {
+    font-family: var(--heading-font);
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1.0;
+    color: #fff;
+    animation: fadeUp 0.7s ease 0.1s both;
+    letter-spacing: -0.02em;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 1.5rem auto 0;
+    font-weight: 300;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2.5rem;
+    justify-content: center;
+    margin-top: 3rem;
+    animation: fadeUp 0.9s ease 0.3s both;
+  }
+
+  .stat { text-align: center; }
+  .stat-num {
+    display: block;
+    font-family: var(--mono-font);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+  }
+
+  .sidebar::-webkit-scrollbar { width: 3px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .sidebar-logo {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .nav-chapter {
+    padding: 0.4rem 1.5rem;
+    font-family: var(--mono-font);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-top: 1rem;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 0.45rem 1.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover {
+    color: var(--text);
+    background: rgba(79,195,247,0.05);
+    border-left-color: var(--accent);
+    padding-left: 1.8rem;
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    padding: 4rem 5rem;
+    max-width: 960px;
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .content { padding: 2rem 1.5rem; }
+  }
+
+  /* ── CHAPTER HEADER ── */
+  .chapter-header {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .chapter-tag {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .chapter-header h2 {
+    font-family: var(--heading-font);
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .chapter-intro {
+    margin-top: 1rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    font-size: 1rem;
+    max-width: 700px;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    margin-bottom: 3.5rem;
+    scroll-margin-top: 2rem;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .section h3 {
+    font-family: var(--heading-font);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section h3::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .section h4 {
+    font-family: var(--body-font);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent2);
+    margin: 1.5rem 0 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .section p {
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+    font-weight: 300;
+  }
+
+  .section p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ── BULLET LIST ── */
+  .notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0;
+  }
+
+  .notes-list li {
+    padding: 0.35rem 0 0.35rem 1.5rem;
+    position: relative;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  .notes-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-family: var(--mono-font);
+    font-size: 12px;
+    top: 0.4rem;
+  }
+
+  .notes-list li strong { color: var(--text); font-weight: 500; }
+
+  /* ── INFO BOXES ── */
+  .info-box {
+    border-left: 3px solid var(--accent);
+    background: rgba(79,195,247,0.05);
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .info-box.warning {
+    border-color: var(--accent2);
+    background: rgba(249,168,37,0.05);
+  }
+
+  .info-box.success {
+    border-color: var(--accent3);
+    background: rgba(105,240,174,0.05);
+  }
+
+  .info-box.danger {
+    border-color: var(--accent4);
+    background: rgba(239,83,80,0.05);
+  }
+
+  .info-box-label {
+    font-family: var(--mono-font);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+
+  .info-box.warning .info-box-label { color: var(--accent2); }
+  .info-box.success .info-box-label { color: var(--accent3); }
+  .info-box.danger .info-box-label { color: var(--accent4); }
+
+  .info-box p { color: var(--text-muted); margin: 0; font-size: 0.9rem; }
+
+  /* ── Q&A ── */
+  .qa-section {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+
+  .qa-header {
+    background: linear-gradient(135deg, rgba(79,195,247,0.12), rgba(79,195,247,0.04));
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .qa-header span {
+    font-family: var(--mono-font);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .qa-item {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .qa-item:last-child { border-bottom: none; }
+
+  .qa-q {
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .qa-q::before {
+    content: 'Q';
+    font-family: var(--mono-font);
+    font-size: 11px;
+    color: var(--accent2);
+    background: rgba(249,168,37,0.12);
+    padding: 1px 6px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    height: fit-content;
+    margin-top: 1px;
+  }
+
+  .qa-a {
+    color: var(--text-muted);
+    font-weight: 300;
+    padding-left: 1.8rem;
+    font-size: 0.9rem;
+  }
+
+  .qa-a strong { color: var(--text); font-weight: 500; }
+
+  /* ── FORMULA BOX ── */
+  .formula {
+    font-family: var(--mono-font);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    color: var(--accent3);
+    font-size: 0.95rem;
+    overflow-x: auto;
+  }
+
+  .formula-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+    font-size: 0.88rem;
+  }
+
+  .compare-table th {
+    background: rgba(79,195,247,0.1);
+    color: var(--accent);
+    font-family: var(--mono-font);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+
+  .compare-table td {
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    vertical-align: top;
+  }
+
+  .compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  /* ── TAG CHIPS ── */
+  .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.75rem 0; }
+
+  .tag {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 2px;
+    background: rgba(79,195,247,0.08);
+    border: 1px solid rgba(79,195,247,0.2);
+    color: var(--accent);
+  }
+
+  /* ── DIVIDER ── */
+  .chapter-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4rem 0;
+    position: relative;
+  }
+
+  .chapter-divider::before {
+    content: attr(data-text);
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    padding: 0 1rem;
+    font-family: var(--mono-font);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+  }
+
+  /* ── DEFINITION GRID ── */
+  .def-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin: 1.25rem 0;
+  }
+
+  .def-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.1rem;
+    transition: border-color 0.2s;
+  }
+
+  .def-card:hover { border-color: rgba(79,195,247,0.3); }
+
+  .def-card-title {
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 0.88rem;
+    margin-bottom: 0.4rem;
+    font-family: var(--mono-font);
+  }
+
+  .def-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 300;
+  }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    margin: 1.5rem 0;
+    padding-left: 0.5rem;
+  }
+
+  .flow-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+  }
+
+  .flow-item:not(:last-child)::after {
+    content: '│';
+    position: absolute;
+    left: 1.05rem;
+    bottom: -0.9rem;
+    color: var(--accent);
+    font-family: var(--mono-font);
+    font-size: 14px;
+  }
+
+  .flow-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin: 0.9rem 0;
+  }
+
+  .flow-label {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  .flow-label strong { color: var(--text); font-weight: 500; }
+
+  /* ── BACK TO TOP ── */
+  .back-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: var(--mono-font);
+    font-size: 18px;
+    transition: all 0.2s;
+    z-index: 100;
+  }
+
+  .back-top:hover {
+    background: rgba(79,195,247,0.12);
+    border-color: var(--accent);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 5rem;
+    padding: 2.5rem 5rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-dim);
+    font-family: var(--mono-font);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── MOBILE NAV TOGGLE ── */
+  .mob-nav-btn {
+    display: none;
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 200;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  @media (max-width: 900px) {
+    .mob-nav-btn { display: flex; align-items: center; justify-content: center; }
+    footer { padding: 2rem 1.5rem; }
+  }
+
+  /* ── HIGHLIGHTED NOTE ── */
+  .hl {
+    background: linear-gradient(90deg, rgba(249,168,37,0.18), transparent);
+    border-left: 3px solid var(--accent2);
+    padding: 0.8rem 1rem;
+    border-radius: 0 4px 4px 0;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .exam-tip {
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+    background: rgba(105,240,174,0.06);
+    border: 1px solid rgba(105,240,174,0.2);
+    padding: 1rem 1.25rem;
+    border-radius: 6px;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  .exam-tip::before {
+    content: '★';
+    color: var(--accent3);
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">IPE-409 · BUET · CAD/CAM</div>
+    <h1>CAD/<span>CAM</span><br>Study Notes</h1>
+    <p class="hero-sub">Comprehensive notes covering all chapters — Geometric Modelling, Computer Graphics, Entity Manipulation & more.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">5</span><span class="stat-label">Chapters</span></div>
+      <div class="stat"><span class="stat-num">50+</span><span class="stat-label">Q&amp;A Pairs</span></div>
+      <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Syllabus</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">IPE-409 · Notes</div>
+
+    <span class="nav-chapter">Ch.1 — The Design Process</span>
+    <a href="#ch1-intro" class="nav-item">Introduction to CAD/CAM</a>
+    <a href="#ch1-process" class="nav-item">Design Process</a>
+    <a href="#ch1-models" class="nav-item">Models of Design</a>
+    <a href="#ch1-concurrent" class="nav-item">Concurrent Engineering</a>
+    <a href="#ch1-cad" class="nav-item">CAD System Architecture</a>
+    <a href="#ch1-qa" class="nav-item">Q&amp;A</a>
+
+    <span class="nav-chapter">Ch.2 — Defining the Model</span>
+    <a href="#ch2-rep" class="nav-item">Design Representation</a>
+    <a href="#ch2-wireframe" class="nav-item">Wire-Frame Geometry</a>
+    <a href="#ch2-surface" class="nav-item">Surface Representation</a>
+    <a href="#ch2-solid" class="nav-item">Solid Modelling</a>
+    <a href="#ch2-csg" class="nav-item">CSG</a>
+    <a href="#ch2-brep" class="nav-item">B-Rep</a>
+    <a href="#ch2-qa" class="nav-item">Q&amp;A</a>
+
+    <span class="nav-chapter">Ch.3 — Geometric Techniques</span>
+    <a href="#ch3-param" class="nav-item">Parametric Representation</a>
+    <a href="#ch3-cubic" class="nav-item">Cubic Polynomial Curves</a>
+    <a href="#ch3-bezier" class="nav-item">Bézier Curves</a>
+    <a href="#ch3-bspline" class="nav-item">B-Spline &amp; NURBS</a>
+    <a href="#ch3-surface" class="nav-item">Surface Modelling</a>
+    <a href="#ch3-volume" class="nav-item">Volume Modelling</a>
+    <a href="#ch3-qa" class="nav-item">Q&amp;A</a>
+
+    <span class="nav-chapter">Ch.4 — Computer Graphics</span>
+    <a href="#ch4-intro" class="nav-item">Computer Graphics Basics</a>
+    <a href="#ch4-hw" class="nav-item">Hardware</a>
+    <a href="#ch4-2d" class="nav-item">2D Graphics</a>
+    <a href="#ch4-3d" class="nav-item">3D Transformations</a>
+    <a href="#ch4-qa" class="nav-item">Q&amp;A</a>
+
+    <span class="nav-chapter">Ch.5 — Entity Manipulation</span>
+    <a href="#ch5-transform" class="nav-item">Object Transformation</a>
+    <a href="#ch5-trim" class="nav-item">Trim, Extend &amp; Functions</a>
+    <a href="#ch5-data" class="nav-item">Data Structures</a>
+    <a href="#ch5-attr" class="nav-item">Associative Geometry</a>
+    <a href="#ch5-qa" class="nav-item">Q&amp;A</a>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="content">
+
+    <!-- ══════════════════════════════════════ -->
+    <!--  CHAPTER 1                             -->
+    <!-- ══════════════════════════════════════ -->
+    <div id="ch1-intro" class="chapter-header">
+      <span class="chapter-tag">Chapter 01</span>
+      <h2>The Design Process &amp; the Role of CAD</h2>
+      <p class="chapter-intro">Understanding how CAD fits into modern product design — from the initial brief through to manufacturing — and why computers became essential in engineering.</p>
+    </div>
+
+    <div class="section" id="ch1-process">
+      <h3>Introduction to CAD/CAM</h3>
+
+      <p><strong>CAD</strong> (Computer-Aided Design) and <strong>CAM</strong> (Computer-Aided Manufacturing) are technologies that use computers to assist in the creation, modification, analysis, and optimization of a design, as well as to control manufacturing machinery.</p>
+
+      <h4>Why CAD is Necessary</h4>
+      <ul class="notes-list">
+        <li>Modern products are extremely complex, requiring large teams to collaborate on development and manufacturing.</li>
+        <li>Increased performance, quality, and sophistication demands are placed on new products.</li>
+        <li>Competitive pressure demands shorter development times and reduced costs.</li>
+        <li>Manual drawing is slow, error-prone, and difficult to modify — computers address all these limitations.</li>
+      </ul>
+
+      <h4>Process for Bringing a Product to Market</h4>
+      <p>The typical product development pipeline follows a sequence of specialist activities:</p>
+      <div class="flow">
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Design Brief</strong> — defines objectives, constraints, customer needs</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Designer</strong> — explores concepts and ways to meet the brief</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Design Analyst</strong> — performs analysis and simulation (FEA, thermal, stress)</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Development/Research Engineers</strong> — build and test prototypes, refine the design</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Process Planner</strong> — identifies manufacturing processes and operations</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Production Planner &amp; Controller</strong> — schedules and monitors production</div></div>
+      </div>
+    </div>
+
+    <div class="section" id="ch1-models">
+      <h3>Models of the Design Process</h3>
+
+      <h4>Phal and Beitz Model</h4>
+      <p>A <strong>sequential</strong> (stage-by-stage) model of design that proceeds through: Clarification of the task → Conceptual design → Embodiment design → Detail design → Manufacturing. Each stage must complete before the next begins.</p>
+
+      <h4>Ohsuga Model</h4>
+      <p>Another sequential model that emphasises the knowledge and information flow during design. It views design as a process of transforming abstract knowledge into concrete specifications through successive refinements.</p>
+
+      <h4>Role of Modelling and Communication</h4>
+      <div class="info-box">
+        <span class="info-box-label">Key Concept</span>
+        <p>A design is abstract until it is manufactured. Models are used to <strong>evaluate, manipulate and refine</strong> the design before committing to manufacture. They also provide the primary means of <strong>communication</strong> between all participants in the design process.</p>
+      </div>
+
+      <h4>Types of Design Models</h4>
+      <ul class="notes-list">
+        <li>Model the <strong>function</strong> of a design (does it do what it should?)</li>
+        <li>Model the <strong>form and shape</strong> (geometric/visual representation)</li>
+        <li>Model <strong>structural behaviour</strong> (stress, thermal, fluid flow)</li>
+        <li>Model <strong>surface condition, dimension, material properties</strong></li>
+        <li><strong>Mathematical models</strong> (equations, simulations)</li>
+      </ul>
+
+      <h4>Applications of Design Models</h4>
+      <div class="def-grid">
+        <div class="def-card">
+          <div class="def-card-title">Evaluating Action</div>
+          <p>Assess the properties and merits of a design — visual check, mass calculation, stress evaluation.</p>
+        </div>
+        <div class="def-card">
+          <div class="def-card-title">Generative Action</div>
+          <p>Generate information downstream for manufacture — tooling data, machine control instructions.</p>
+        </div>
+        <div class="def-card">
+          <div class="def-card-title">Design Analyst Tasks</div>
+          <p>Visual assessment, mass calculation, evaluation of stresses in components.</p>
+        </div>
+        <div class="def-card">
+          <div class="def-card-title">Manufacturing Engineer Tasks</div>
+          <p>Extract tooling information and generate control data for production machines (CNC code).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="ch1-concurrent">
+      <h3>Traditional vs. Concurrent Engineering</h3>
+
+      <h4>Traditional (Sequential) Design Process</h4>
+      <p>In the traditional process, engineering drawings are produced by the design department, sent for analytical evaluation, then passed on for manufacturing planning. If issues are found, they go back to design — creating costly rework loops. In aerospace manufacturing, the average drawing change was found to be <strong>4.5 times</strong> per design.</p>
+      <p>Designers focused on functional aspects <em>at the expense of</em> ease of manufacturing, maintainability, and assembly.</p>
+
+      <h4>Concurrent Engineering</h4>
+      <div class="info-box success">
+        <span class="info-box-label">Definition</span>
+        <p><strong>Concurrent Engineering</strong> is an approach where design, development, analysis, and preparation of manufacturing information are conducted <strong>in parallel</strong> rather than sequentially, bringing together a multi-disciplinary team with all required specialist expertise.</p>
+      </div>
+      <ul class="notes-list">
+        <li>Overcomes the inefficiencies of sequential models.</li>
+        <li>Reduces product design and development time-scales significantly.</li>
+        <li>Mainly used by companies with established products where new models are required at regular intervals (e.g., automotive).</li>
+        <li>Enabled by shared CAD databases that all specialists can access simultaneously.</li>
+      </ul>
+    </div>
+
+    <div class="section" id="ch1-cad">
+      <h3>CAD System Architecture</h3>
+
+      <p>A complete CAD system consists of four major components:</p>
+      <div class="def-grid">
+        <div class="def-card"><div class="def-card-title">Hardware</div><p>Workstations, displays, input devices, output (plotters, printers).</p></div>
+        <div class="def-card"><div class="def-card-title">Software</div><p>The CAD application with all processing modules.</p></div>
+        <div class="def-card"><div class="def-card-title">Data</div><p>The design database — geometric entities, attributes, assembly data.</p></div>
+        <div class="def-card"><div class="def-card-title">Human Knowledge</div><p>The expertise of the engineers and designers operating the system.</p></div>
+      </div>
+
+      <h4>Software Modules in a CAD System</h4>
+      <ul class="notes-list">
+        <li><strong>Model Definition</strong> — creating geometric and non-geometric entities</li>
+        <li><strong>Model Manipulation</strong> — transformations, trimming, boolean operations</li>
+        <li><strong>Picture Generation</strong> — rendering views on the display</li>
+        <li><strong>User Interaction</strong> — handling input from devices</li>
+        <li><strong>Database Management</strong> — storing, retrieving, organising data</li>
+        <li><strong>Application Modules</strong> — FEA, NC programming, simulation</li>
+        <li><strong>Utilities</strong> — file management, import/export, conversion</li>
+      </ul>
+    </div>
+
+    <!-- Ch1 Q&A -->
+    <div class="section" id="ch1-qa">
+      <h3>Questions &amp; Answers — Chapter 1</h3>
+      <div class="qa-section">
+        <div class="qa-header"><span>Exam Practice Q&amp;A</span></div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is CAD and why is it needed in modern engineering?</div>
+          <div class="qa-a">CAD (Computer-Aided Design) is the use of computer software to create, modify, analyse and optimise a design. It is needed because modern products are complex, competitive pressure demands shorter development cycles and lower costs, and computer tools eliminate the limitations of manual drawing (difficulty modifying, slow process, poor communication).</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What are the key stages in bringing a product to market?</div>
+          <div class="qa-a">The stages are: <strong>Design Brief → Designer (explore concepts) → Design Analyst (analysis & simulation) → Development/Research Engineers (prototype testing) → Process Planner (identify manufacturing processes) → Production Planner/Controller (schedule production)</strong>.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Compare the Phal &amp; Beitz Model and the Ohsuga Model of design.</div>
+          <div class="qa-a">Both are <strong>sequential (traditional) models</strong> of the design process. The <strong>Phal & Beitz model</strong> focuses on stages from task clarification through to detail design, each completed before the next starts. The <strong>Ohsuga model</strong> emphasises knowledge and information transformation during design. Both contrast with Concurrent Engineering, which runs these stages in parallel.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is Concurrent Engineering and what problem does it solve?</div>
+          <div class="qa-a">Concurrent Engineering conducts design, development, analysis, and manufacturing preparation <strong>in parallel</strong> using multi-disciplinary teams. It solves the problem of costly sequential loops where issues discovered late (e.g., un-manufacturable features) require sending work all the way back to the beginning, causing delays and expense (noted as averaging 4.5 drawing changes in aerospace).</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is the difference between evaluating action and generative action in design models?</div>
+          <div class="qa-a"><strong>Evaluating Action</strong> uses the model to assess properties and quality of the current design (visual check, stress analysis, mass). <strong>Generative Action</strong> uses the model to produce information needed downstream — specifically to progress manufacture, such as generating tooling paths or CNC machine control code.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">List the four major components of a CAD system and the software modules within it.</div>
+          <div class="qa-a">The four components are <strong>Hardware, Software, Data, and Human Knowledge</strong>. The software modules are: model definition, model manipulation, picture generation, user interaction, database management, application modules (FEA, NC programming), and utilities.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Why do designers in traditional processes sometimes produce designs that are difficult to manufacture?</div>
+          <div class="qa-a">Because in traditional sequential design, designers work in isolation focusing only on functional requirements. Manufacturing specialists are consulted only after the design is complete. Without early input from manufacturing engineers, features that are difficult or expensive to produce are inadvertently included. Concurrent Engineering solves this by involving all specialists from the start.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="chapter-divider" data-text="END OF CHAPTER 1">
+
+    <!-- ══════════════════════════════════════ -->
+    <!--  CHAPTER 2                             -->
+    <!-- ══════════════════════════════════════ -->
+    <div id="ch2-rep" class="chapter-header">
+      <span class="chapter-tag">Chapter 02</span>
+      <h2>Defining the Model</h2>
+      <p class="chapter-intro">How 3D objects are mathematically represented in a computer — from simple wire-frames to full solid models using CSG and B-Rep techniques.</p>
+    </div>
+
+    <div class="section">
+      <h3>Establishing Design Representation</h3>
+
+      <h4>Traditional 2D Drawings</h4>
+      <p>3D forms have historically been represented in 2D by projecting views onto mutually perpendicular planes. Two conventions exist:</p>
+      <ul class="notes-list">
+        <li><strong>First Angle Projection (European)</strong> — object is between observer and projection plane; the view seen from the right goes to the left of the front view.</li>
+        <li><strong>Third Angle Projection (American)</strong> — projection plane is between observer and object; view from the right goes to the right of the front view.</li>
+        <li><strong>Pictorial Projections</strong> — isometric, oblique, perspective — give a 3D-looking image on 2D media.</li>
+      </ul>
+
+      <h4>Computer-Aided Draughting (CAD)</h4>
+      <p>Computers replaced manual drawing by allowing geometric entities (points, lines, arcs, splines) to be defined digitally and displayed on screen. Methods include:</p>
+      <ul class="notes-list">
+        <li>Coordinate input (absolute, relative, polar)</li>
+        <li>Constraint-based construction (snap-to-grid, snap-to-endpoint)</li>
+        <li>Copy, mirror, offset, pattern operations</li>
+      </ul>
+    </div>
+
+    <div class="section" id="ch2-wireframe">
+      <h3>Wire-Frame Geometry</h3>
+      <div class="info-box warning">
+        <span class="info-box-label">Definition</span>
+        <p>Wire-frame models represent an object using only its edges and vertices — like a skeletal framework. No surfaces are defined.</p>
+      </div>
+
+      <h4>Advantages</h4>
+      <ul class="notes-list">
+        <li>Relatively <strong>simple and straightforward</strong> to create.</li>
+        <li><strong>Less computer resource</strong> (memory, processing) required.</li>
+        <li>Fast display and response times.</li>
+      </ul>
+
+      <h4>Disadvantages</h4>
+      <ul class="notes-list">
+        <li><strong>Ambiguity</strong> in representation — multiple interpretations of the same wire-frame are possible.</li>
+        <li><strong>No surface information</strong> — cannot distinguish inside from outside.</li>
+        <li>Deficient pictorial representation — difficult to visualise complex shapes.</li>
+        <li><strong>Limited ability</strong> to calculate geometric intersections or mechanical properties (mass, volume, CG).</li>
+      </ul>
+    </div>
+
+    <div class="section" id="ch2-surface">
+      <h3>Surface Representation Scheme</h3>
+      <p>Surface modelling overcomes wire-frame ambiguity by representing the object with defined surfaces. Surfaces are categorised into three types:</p>
+
+      <h4>Category 1 — Analytic Surfaces</h4>
+      <p>Surfaces fitted to arrays of <strong>control points</strong>. The surface either passes through (interpolates) or approximates the control points.</p>
+
+      <h4>Category 2 — Curve-Based Surfaces</h4>
+      <p>The surface is imagined as a skin stretched over a wire-frame skeleton. Types include:</p>
+      <div class="def-grid">
+        <div class="def-card"><div class="def-card-title">Tabulated Surface</div><p>A curve translated along a straight line (directrix).</p></div>
+        <div class="def-card"><div class="def-card-title">Ruled Surface</div><p>Straight lines connecting two boundary curves.</p></div>
+        <div class="def-card"><div class="def-card-title">Surface of Revolution</div><p>A profile curve rotated around an axis.</p></div>
+        <div class="def-card"><div class="def-card-title">Swept Surface</div><p>A profile swept along a 3D guide curve.</p></div>
+        <div class="def-card"><div class="def-card-title">Curved Mesh</div><p>Surface defined by a network of crossing curves.</p></div>
+      </div>
+
+      <h4>Category 3 — Interpolation Surfaces</h4>
+      <p>Surfaces defined to smoothly interpolate between other surfaces — used to create smooth transitions and blends between geometric features.</p>
+
+      <h4>Surface Patches</h4>
+      <p>Real artefacts are represented by assembling multiple surface <strong>patches</strong>. A car body may require hundreds of patches. Surfaces are continuous — every point is defined by mathematical relationships.</p>
+
+      <h4>Applications</h4>
+      <ul class="notes-list">
+        <li>Automobile body design</li>
+        <li>Mould and die manufacturing</li>
+        <li>Shoe and garment industries</li>
+        <li>Sheet metal forming</li>
+      </ul>
+
+      <h4>Limitations</h4>
+      <ul class="notes-list">
+        <li>Computationally demanding; requires more skill.</li>
+        <li>Difficult to interpret complex shapes.</li>
+        <li>Hard to represent three-sided or five-sided patches.</li>
+      </ul>
+    </div>
+
+    <div class="section" id="ch2-solid">
+      <h3>Solid Modelling</h3>
+      <div class="info-box success">
+        <span class="info-box-label">Why Solid Modelling?</span>
+        <p>Engineering analysis (FEA, mass properties) and generation of manufacturing information (CNC paths, mould design) require complete solid models. Solid models provide <strong>unambiguous, complete</strong> representation of both geometry and topology.</p>
+      </div>
+
+      <h4>Conditions for Successful Solid Representation</h4>
+      <ul class="notes-list">
+        <li>Must be <strong>complete and unambiguous</strong></li>
+        <li>Must be <strong>appropriate</strong> for real engineering objects</li>
+        <li>Must be <strong>practical</strong> with existing computers</li>
+      </ul>
+
+      <p>Two major classes of solid modelling methods exist: <strong>CSG</strong> and <strong>B-Rep</strong>.</p>
+    </div>
+
+    <div class="section" id="ch2-csg">
+      <h3>Constructive Solid Geometry (CSG)</h3>
+      <p>CSG builds complex solids from simple <strong>primitive shapes</strong> using set-theory (boolean) operations.</p>
+
+      <h4>Primitives Used</h4>
+      <div class="tags">
+        <span class="tag">Cuboid (Box)</span>
+        <span class="tag">Cylinder</span>
+        <span class="tag">Sphere</span>
+        <span class="tag">Cone</span>
+        <span class="tag">Torus</span>
+        <span class="tag">Wedge</span>
+      </div>
+
+      <h4>Boolean Operations</h4>
+      <div class="def-grid">
+        <div class="def-card"><div class="def-card-title">Union ( ∪ )</div><p>Combines two solids into one — the volume of both.</p></div>
+        <div class="def-card"><div class="def-card-title">Intersection ( ∩ )</div><p>Retains only the overlapping volume of two solids.</p></div>
+        <div class="def-card"><div class="def-card-title">Difference ( − )</div><p>Subtracts one solid from another — used to create holes and pockets.</p></div>
+      </div>
+
+      <h4>Properties of CSG</h4>
+      <ul class="notes-list">
+        <li><strong>Very compact</strong> representation — stores only primitives and operations.</li>
+        <li>Creates solid models <strong>unambiguously</strong>.</li>
+        <li>Stored in <strong>unevaluated form</strong> as a tree (CSG tree) — edges and surfaces are not explicitly stored.</li>
+        <li>Computational overhead when finding edges and surfaces for display or analysis.</li>
+        <li><strong>Robust</strong> — membership test (is point inside the solid?) is efficient.</li>
+      </ul>
+    </div>
+
+    <div class="section" id="ch2-brep">
+      <h3>Boundary Representation (B-Rep)</h3>
+      <p>B-Rep defines a solid by its complete boundary — the set of faces, edges, and vertices that enclose the object.</p>
+
+      <h4>Validity Conditions for B-Rep Models</h4>
+      <ul class="notes-list">
+        <li>Faces do not intersect except at <strong>common vertices and edges</strong>.</li>
+        <li>Boundaries are <strong>simple loops of edges</strong>.</li>
+        <li>The set of faces <strong>completely encloses</strong> the solid — no missing faces.</li>
+        <li><strong>Euler's Rule</strong> must be satisfied: <code>V − E + F = 2</code></li>
+        <li><strong>Euler-Poincaré Formula</strong> for more complex models: <code>V − E + F − H + 2P = 2B</code></li>
+      </ul>
+
+      <div class="formula">
+        <div class="formula-label">Euler's Rule (simple polyhedra)</div>
+        V − E + F = 2
+        <div class="formula-label" style="margin-top:0.75rem">Euler-Poincaré Formula (general)</div>
+        V − E + F − H + 2P = 2B
+        <div class="formula-label" style="margin-top:0.75rem">Where: V=vertices, E=edges, F=faces, H=holes in faces, P=through-holes (passages), B=bodies</div>
+      </div>
+
+      <h4>CSG vs B-Rep Comparison</h4>
+      <table class="compare-table">
+        <tr><th>Feature</th><th>CSG</th><th>B-Rep</th></tr>
+        <tr><td>Storage</td><td>Very compact (tree of primitives)</td><td>Larger (explicit faces, edges, vertices)</td></tr>
+        <tr><td>Display generation</td><td>Slower (must evaluate tree)</td><td>Better and faster</td></tr>
+        <tr><td>Membership testing</td><td>Excellent (robust)</td><td>More complex</td></tr>
+        <tr><td>Surface modelling integration</td><td>Difficult</td><td>Natural</td></tr>
+        <tr><td>Conversion</td><td>CSG → B-Rep: easy</td><td>B-Rep → CSG: very difficult</td></tr>
+        <tr><td>Popularity</td><td>Less common today</td><td>More widely used</td></tr>
+      </table>
+
+      <h4>Why is B-Rep More Popular than CSG?</h4>
+      <ul class="notes-list">
+        <li><strong>Geometric limitations</strong> of CSG — cannot represent all engineering shapes.</li>
+        <li>Converting CSG → B-Rep is easy, but B-Rep → CSG is very difficult.</li>
+        <li>Tendency to <strong>combine</strong> solid, surface, and wire-frame modelling — B-Rep integrates naturally.</li>
+      </ul>
+    </div>
+
+    <!-- Ch2 Q&A -->
+    <div class="section" id="ch2-qa">
+      <h3>Questions &amp; Answers — Chapter 2</h3>
+      <div class="qa-section">
+        <div class="qa-header"><span>Exam Practice Q&amp;A</span></div>
+
+        <div class="qa-item">
+          <div class="qa-q">What are the strengths and weaknesses of wire-frame modelling?</div>
+          <div class="qa-a"><strong>Strengths:</strong> Simple to create, requires little computing resource, fast. <strong>Weaknesses:</strong> Ambiguous (multiple interpretations possible), no surface definition, cannot distinguish inside from outside, limited for calculating mass/volume/CG or finding geometric intersections.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Explain the three categories of surface representation.</div>
+          <div class="qa-a"><strong>Category 1:</strong> Surfaces fitted to arrays of control points (interpolating or approximating). <strong>Category 2:</strong> Surfaces based on curves — tabulated, ruled, revolution, swept, curved mesh. <strong>Category 3:</strong> Surfaces defined to interpolate between other surfaces (smooth blends/transitions).</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What are the three boolean operations in CSG and what does each do?</div>
+          <div class="qa-a"><strong>Union (∪):</strong> Combines two solids — result is the total volume of both. <strong>Intersection (∩):</strong> Keeps only the volume common to both solids. <strong>Difference (−):</strong> Subtracts one solid from another, creating holes or pockets.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">State Euler's rule and the Euler-Poincaré formula and define all terms.</div>
+          <div class="qa-a"><strong>Euler's Rule (simple polyhedra):</strong> V − E + F = 2, where V = vertices, E = edges, F = faces. <strong>Euler-Poincaré Formula:</strong> V − E + F − H + 2P = 2B, where H = holes in faces, P = through-passages (handles), B = number of separate bodies. Example: a cube has V=8, E=12, F=6 → 8−12+6 = 2 ✓</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Why is B-Rep generally preferred over CSG in modern CAD systems?</div>
+          <div class="qa-a">Three main reasons: (1) CSG has geometric limitations — it cannot represent all engineering shapes using only primitives and boolean operations. (2) Conversion from CSG to B-Rep is straightforward, but the reverse is very difficult. (3) Modern CAD needs to integrate solid, surface, and wire-frame modelling together — B-Rep accommodates this naturally while CSG does not.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What conditions must a valid B-Rep model satisfy?</div>
+          <div class="qa-a">Faces must not intersect except at shared edges and vertices; boundaries must be simple loops of edges; the complete set of faces must close to form the full outer skin (no missing faces); Euler's rule (V−E+F=2) or the Euler-Poincaré formula must be satisfied; each edge must adjoin exactly two faces; at least three edges must meet at each vertex.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">A model has V=10, E=15, F=7. Does it satisfy Euler's rule?</div>
+          <div class="qa-a">V − E + F = 10 − 15 + 7 = <strong>2</strong>. Yes, Euler's rule is satisfied.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="chapter-divider" data-text="END OF CHAPTER 2">
+
+    <!-- ══════════════════════════════════════ -->
+    <!--  CHAPTER 3                             -->
+    <!-- ══════════════════════════════════════ -->
+    <div id="ch3-param" class="chapter-header">
+      <span class="chapter-tag">Chapter 03</span>
+      <h2>Techniques for Geometric Modelling</h2>
+      <p class="chapter-intro">Mathematical tools for representing curves, surfaces and volumes — from parametric cubic polynomials to NURBS and boundary models.</p>
+    </div>
+
+    <div class="section">
+      <h3>Why Parametric Representation?</h3>
+      <p>Classical curve equations (y = mx + c, ax+by+c=0) have several problems that make them unsuitable for CAD:</p>
+      <ul class="notes-list">
+        <li>The slope m ranges from −∞ to +∞ (vertical lines are undefined)</li>
+        <li>Equations are <strong>unbounded</strong> — describe an infinite line, not a segment</li>
+        <li>They are <strong>multi-valued</strong> — y=f(x) can only give one y per x</li>
+        <li>Sequence of points along the curve is not directly available</li>
+        <li>Equations <strong>change form</strong> when the coordinate system changes</li>
+        <li>Difficult to represent complex shapes like aerofoils or cylinder intersections</li>
+      </ul>
+
+      <h4>The Parametric Approach</h4>
+      <div class="info-box">
+        <span class="info-box-label">Core Idea</span>
+        <p>Express x, y, z coordinates of points on a curve/surface not as functions of each other, but as functions of one or more independent <strong>parameters</strong> (typically u, v, w).</p>
+      </div>
+
+      <div class="formula">
+        <div class="formula-label">Curve (1 parameter)</div>
+        p = p(u) → x=x(u), y=y(u), z=z(u)
+        <div class="formula-label" style="margin-top:0.75rem">Surface (2 parameters)</div>
+        p = p(u, v)
+        <div class="formula-label" style="margin-top:0.75rem">Solid (3 parameters)</div>
+        p = p(u, v, w)
+      </div>
+    </div>
+
+    <div class="section" id="ch3-cubic">
+      <h3>Parametric Cubic Polynomial Curves</h3>
+      <p>A cubic polynomial curve is defined by 4 conditions (since it has 4 unknown coefficient vectors for each of x, y, z — giving 12 unknowns total).</p>
+
+      <div class="formula">
+        <div class="formula-label">Vector form</div>
+        p(u) = k₀ + k₁u + k₂u² + k₃u³ ,  0 ≤ u ≤ 1
+      </div>
+
+      <h4>Hermite Form</h4>
+      <p>The 12 unknowns are determined by specifying <strong>two end points and the tangent vectors (slopes) at each end</strong>:</p>
+      <ul class="notes-list">
+        <li>P(0) — position at u=0</li>
+        <li>P(1) — position at u=1</li>
+        <li>P'(0) — tangent vector at u=0</li>
+        <li>P'(1) — tangent vector at u=1</li>
+      </ul>
+      <p>The curve is defined by <strong>blending functions</strong> (Hermite basis functions) H₀, H₁, H₂, H₃ that weight each boundary condition.</p>
+
+      <div class="exam-tip">The Hermite form is useful when you know the endpoints and want to control the <em>direction</em> the curve arrives/departs at each end. The tangent vectors directly control curve shape at the endpoints.</div>
+    </div>
+
+    <div class="section" id="ch3-bezier">
+      <h3>Bézier Curves</h3>
+      <p>The Bézier form uses <strong>four control points</strong> (for a cubic) which need not lie on the curve. The curve is <em>attracted towards</em> the control points but only passes through the two end points.</p>
+
+      <h4>Key Relationship</h4>
+      <div class="formula">
+        <div class="formula-label">Tangent at start and end (cubic Bézier)</div>
+        P'(0) = 3(P₁ − P₀)
+        P'(1) = 3(P₃ − P₂)
+      </div>
+
+      <h4>Blending Functions (Bernstein Polynomials)</h4>
+      <div class="formula">
+        <div class="formula-label">Cubic Bernstein basis</div>
+        B₀(u) = (1−u)³
+        B₁(u) = 3u(1−u)²
+        B₂(u) = 3u²(1−u)
+        B₃(u) = u³
+      </div>
+
+      <div class="formula">
+        <div class="formula-label">Bézier Curve equation (n=3)</div>
+        P(u) = B₀(u)P₀ + B₁(u)P₁ + B₂(u)P₂ + B₃(u)P₃
+      </div>
+
+      <h4>Example Calculation</h4>
+      <div class="hl">Given P₀=(1,1), P₁=(3,6), P₂=(5,7), P₃=(7,2). Find P(u=0.5).<br><br>
+        B₀(0.5)=0.125, B₁(0.5)=0.375, B₂(0.5)=0.375, B₃(0.5)=0.125<br>
+        x = 0.125×1 + 0.375×3 + 0.375×5 + 0.125×7 = 0.125+1.125+1.875+0.875 = <strong>4.0</strong><br>
+        y = 0.125×1 + 0.375×6 + 0.375×7 + 0.125×2 = 0.125+2.25+2.625+0.25 = <strong>5.25</strong><br>
+        → P(0.5) = (4, 5.25)
+      </div>
+
+      <h4>Hermite vs. Bézier — Key Differences</h4>
+      <table class="compare-table">
+        <tr><th>Property</th><th>Hermite</th><th>Bézier</th></tr>
+        <tr><td>Input specification</td><td>2 endpoints + 2 tangent vectors</td><td>4 control points</td></tr>
+        <tr><td>Curve passes through…</td><td>Both endpoints</td><td>Only 2 end control points</td></tr>
+        <tr><td>Tangent control</td><td>Directly specified</td><td>Implied by adjacent control points</td></tr>
+        <tr><td>Intuitive control</td><td>Less intuitive</td><td>More intuitive (drag control points)</td></tr>
+        <tr><td>Global vs local modification</td><td>Local effect (2 segments)</td><td>Global — moving any point affects whole curve</td></tr>
+      </table>
+
+      <h4>Advantages of Bézier over Hermite</h4>
+      <ul class="notes-list">
+        <li>More <strong>intuitive</strong> to use — designer manipulates control point positions, not abstract tangent vectors.</li>
+        <li>Convex hull property — curve always stays within the convex hull of control points.</li>
+        <li>Generalises to any degree: n+1 control points define degree-n curve.</li>
+      </ul>
+    </div>
+
+    <div class="section" id="ch3-bspline">
+      <h3>B-Spline Curves and NURBS</h3>
+
+      <h4>Cubic Spline (Composite Curve)</h4>
+      <p>A cubic spline joins multiple cubic segments end-to-end at <strong>knot points</strong>, maintaining continuity at joints:</p>
+      <ul class="notes-list">
+        <li>C(1) continuity — tangent (first derivative) is continuous across the join</li>
+        <li>C(2) continuity — curvature (second derivative) is also continuous</li>
+        <li>For n knot points: (n−1) spans, 4(n−1) coefficient vectors needed</li>
+        <li>Global modification remains a problem (changing one point can propagate effect)</li>
+      </ul>
+
+      <h4>Degrees of Continuity</h4>
+      <div class="def-grid">
+        <div class="def-card"><div class="def-card-title">C(0) — Positional</div><p>Curves meet at a common point. No smoothness guarantee.</p></div>
+        <div class="def-card"><div class="def-card-title">C(1) — Tangent</div><p>First derivatives match — curve is smooth at joins.</p></div>
+        <div class="def-card"><div class="def-card-title">C(2) — Curvature</div><p>Second derivatives match — curvature is continuous, giving a visually fair curve.</p></div>
+        <div class="def-card"><div class="def-card-title">G(1) — Geometric</div><p>Tangent direction is continuous but not necessarily the magnitude.</p></div>
+      </div>
+
+      <h4>B-Spline Curves</h4>
+      <div class="info-box">
+        <span class="info-box-label">Key Advantage</span>
+        <p>B-Splines solve the <strong>local modification</strong> problem. Moving one control point only affects the portion of the curve near that point — unlike Bézier curves where every control point affects the entire curve.</p>
+      </div>
+      <ul class="notes-list">
+        <li>The <strong>degree of the curve is independent</strong> of the number of control points (unlike Bézier where degree = n_points − 1).</li>
+        <li>Blending functions are <strong>non-zero only over a limited range</strong> of u — giving local control.</li>
+        <li>Blending functions of order 2 (linear), 3 (quadratic), 4 (cubic).</li>
+        <li>Curve does <strong>not pass through</strong> the two end control points.</li>
+      </ul>
+
+      <h4>NURBS (Non-Uniform Rational B-Splines)</h4>
+      <p>NURBS is the most general curve/surface representation used in modern CAD. It unifies:</p>
+      <ul class="notes-list">
+        <li>Free-form curves and surfaces (B-spline capability)</li>
+        <li>Exact representation of <strong>conic sections</strong> (circles, ellipses, parabolas, hyperbolas) — which B-splines can only approximate</li>
+        <li>Non-uniform knot spacing for finer local control</li>
+        <li>Rational weights on control points for additional shape control</li>
+      </ul>
+    </div>
+
+    <div class="section" id="ch3-surface">
+      <h3>Surface Modelling Techniques</h3>
+
+      <h4>General Form</h4>
+      <p>Surface modelling extends polynomial curve techniques to 2D using two parameters u and v:</p>
+      <div class="formula">p = p(u, v),   0 ≤ u ≤ 1,   0 ≤ v ≤ 1</div>
+
+      <h4>Coons Patch</h4>
+      <p>A <strong>linearly blended Coons patch</strong> creates a smooth surface bounded by four boundary curves. It interpolates between the boundaries. Used in FEM meshing and industrial design to join adjacent surfaces smoothly.</p>
+
+      <h4>Bicubic Patch</h4>
+      <p>An extension of cubic spline curves to surfaces. Uses positions and tangent vectors (cross-derivatives, or "twist vectors") at the four corners of the patch to fully define the surface.</p>
+
+      <h4>Bézier Surface</h4>
+      <p>A 2D extension of the Bézier curve — uses a <strong>grid (m+1)×(n+1) of control points</strong>. The surface is attracted to but only passes through the corner control points.</p>
+      <div class="formula">
+        <div class="formula-label">Bézier Surface</div>
+        p(u,v) = ΣΣ Bᵢ(u) Bⱼ(v) Pᵢⱼ
+      </div>
+
+      <h4>B-Spline Surface</h4>
+      <p>Extension of B-spline curves to surfaces — provides <strong>local modification</strong> capability in both u and v directions. Used in complex free-form shapes.</p>
+    </div>
+
+    <div class="section" id="ch3-volume">
+      <h3>Volume Modelling</h3>
+
+      <h4>Boundary Models (B-Rep) Rules</h4>
+      <ul class="notes-list">
+        <li>Each face must be bounded by a single ring (loop)</li>
+        <li>Each edge must adjoin exactly two faces and have a vertex at each end</li>
+        <li>At least three edges must meet at each vertex</li>
+        <li>Euler's Rule: V − E + F = 2</li>
+        <li>Euler-Poincaré: V − E + F − H + 2P = 2B</li>
+      </ul>
+
+      <h4>Other Modelling Techniques</h4>
+      <div class="def-grid">
+        <div class="def-card"><div class="def-card-title">Pure Primitive Instancing</div><p>For part families — geometrically and topologically similar but not dimensionally similar. Instances are parameterised variations of a prototype.</p></div>
+        <div class="def-card"><div class="def-card-title">Cell Decomposition</div><p>Object divided into simple cells (tetrahedra, hexahedra). Used in FEA meshing. Not a true solid model boundary representation.</p></div>
+        <div class="def-card"><div class="def-card-title">Spatial Occupancy Enumeration</div><p>Space divided into a grid of small cubes (voxels). Each voxel is marked as inside or outside the object. Computationally expensive but useful for visualisation and medical imaging.</p></div>
+      </div>
+    </div>
+
+    <!-- Ch3 Q&A -->
+    <div class="section" id="ch3-qa">
+      <h3>Questions &amp; Answers — Chapter 3</h3>
+      <div class="qa-section">
+        <div class="qa-header"><span>Exam Practice Q&amp;A</span></div>
+
+        <div class="qa-item">
+          <div class="qa-q">What problems with classical curve equations make parametric representation necessary?</div>
+          <div class="qa-a">Classical equations (y=mx+c) have problems: slope m is infinite for vertical lines; equations are unbounded (infinite line, not segment); they are multi-valued; sequence of points is unavailable; equations change form with coordinate system changes; and they are difficult to use for complex shapes like aerofoils or cylinder intersections.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Derive the parametric form of a cubic polynomial curve.</div>
+          <div class="qa-a">A cubic polynomial in parameter u is: <strong>p(u) = k₀ + k₁u + k₂u² + k₃u³</strong> for 0≤u≤1. Each coordinate (x, y, z) has this form, giving 12 unknown scalar coefficients. We need 4 vector conditions (points or tangents at boundaries) to uniquely determine these 12 unknowns. In matrix form: p(u) = [1 u u² u³] · K where K is the 4×3 coefficient matrix.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Draw and explain the blending functions of Hermite and Bézier forms.</div>
+          <div class="qa-a"><strong>Hermite blending functions</strong> (H₀, H₁, H₂, H₃): H₀ and H₁ blend the endpoint positions; H₂ and H₃ blend the endpoint tangents. Each function has value 1 at its corresponding boundary and 0 at the other. <strong>Bézier blending functions</strong> (Bernstein polynomials for n=3): B₀=(1−u)³, B₁=3u(1−u)², B₂=3u²(1−u), B₃=u³. All are non-negative and sum to 1 over the interval. Key difference: Bézier functions are all non-zero throughout [0,1], while Hermite functions are more localised near their respective boundaries.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What are the advantages of B-Spline over Bézier curves?</div>
+          <div class="qa-a"><strong>Local modification:</strong> Moving one B-spline control point only affects a local portion of the curve. In Bézier, all control points globally affect the entire curve. <strong>Degree independence:</strong> B-spline degree is independent of number of control points. Bézier degree = n_points − 1, which becomes impractical for many points. <strong>Better for complex shapes:</strong> Can have many control points without raising degree.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is NURBS and why is it the standard in modern CAD?</div>
+          <div class="qa-a">NURBS (Non-Uniform Rational B-Splines) is a generalisation of B-splines that adds rational (weighted) control points and non-uniform knot spacing. It is the standard because: (1) it can represent <strong>exactly</strong> all standard analytic curves (circles, ellipses, conics) and free-form curves in a single unified framework; (2) it provides local modification; (3) it is invariant under affine and projective transformations; (4) it allows fine local control through knot insertion.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is C(1) and C(2) continuity? What is the difference between parametric (C) and geometric (G) continuity?</div>
+          <div class="qa-a"><strong>C(1):</strong> The first parametric derivative (tangent vector, including magnitude) is equal on both sides of a join. <strong>C(2):</strong> Both first and second derivatives are equal. <strong>Parametric continuity (C):</strong> Derivative vectors must match in both direction AND magnitude. <strong>Geometric continuity (G):</strong> Only the direction needs to match, not the magnitude. G(1) gives visually smooth joins even when parameter speeds differ across the join — this is often sufficient for aesthetic design.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Verify the Euler-Poincaré formula for a solid with V=12, E=18, F=8, H=2, P=1, B=1.</div>
+          <div class="qa-a">V − E + F − H + 2P = 2B<br>12 − 18 + 8 − 2 + 2(1) = 12 − 18 + 8 − 2 + 2 = <strong>2</strong><br>2B = 2(1) = <strong>2</strong> ✓ Formula is satisfied.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="chapter-divider" data-text="END OF CHAPTER 3">
+
+    <!-- ══════════════════════════════════════ -->
+    <!--  CHAPTER 4                             -->
+    <!-- ══════════════════════════════════════ -->
+    <div id="ch4-intro" class="chapter-header">
+      <span class="chapter-tag">Chapter 04</span>
+      <h2>Elements of Interactive Computer Graphics</h2>
+      <p class="chapter-intro">How computers generate, display and allow users to interact with graphical representations of design models.</p>
+    </div>
+
+    <div class="section">
+      <h3>Computer Graphics Overview</h3>
+      <p>Computer graphics is the use of computers to <strong>display and manipulate information in graphical or pictorial form</strong>, either on a display unit or via a printer/plotter.</p>
+
+      <h4>Applications of Computer Graphics</h4>
+      <div class="tags">
+        <span class="tag">CAD/CAM</span>
+        <span class="tag">Computer Art</span>
+        <span class="tag">Presentations</span>
+        <span class="tag">Entertainment (Games/Film)</span>
+        <span class="tag">Education &amp; Training</span>
+        <span class="tag">Visualisation</span>
+        <span class="tag">Image Processing</span>
+      </div>
+
+      <h4>Classification of Computer Graphics</h4>
+      <table class="compare-table">
+        <tr><th>Basis</th><th>Type 1</th><th>Type 2</th></tr>
+        <tr><td>User control</td><td><strong>Passive</strong> — no real-time interaction</td><td><strong>Interactive</strong> — user can manipulate display</td></tr>
+        <tr><td>Image generation</td><td><strong>Vector graphics</strong> — draws lines/curves directly</td><td><strong>Raster graphics</strong> — image as pixel array</td></tr>
+        <tr><td>Space</td><td><strong>Image space</strong> — operates on pixels (Paint)</td><td><strong>Object space</strong> — operates on geometric objects (CAD, simulators)</td></tr>
+      </table>
+    </div>
+
+    <div class="section" id="ch4-hw">
+      <h3>Computer Graphics Hardware</h3>
+
+      <h4>Vector Displays (Historical)</h4>
+      <p>Drew pictures by constructing series of lines (vectors) on a CRT screen. Popular until the 1980s. Sharp lines, no aliasing, but limited colour and fill capabilities.</p>
+
+      <h4>Raster Displays (Current)</h4>
+      <p>Most popular today. Use a grid of pixels (picture elements). Types include:</p>
+      <div class="tags">
+        <span class="tag">CRT (Cathode Ray Tube)</span>
+        <span class="tag">LCD (Liquid Crystal Display)</span>
+        <span class="tag">TFT (Thin-Film Transistor)</span>
+        <span class="tag">LED/OLED</span>
+      </div>
+
+      <h4>Drawbacks of Raster Displays</h4>
+      <ul class="notes-list">
+        <li><strong>Poor resolution</strong> at low pixel densities</li>
+        <li>Lines and curves are not smooth — displayed as pixel approximations</li>
+        <li><strong>Staircasing effect (aliasing)</strong> — diagonal and curved lines appear as stair-steps because of the discrete pixel grid</li>
+      </ul>
+
+      <h4>Antialiasing</h4>
+      <div class="info-box success">
+        <span class="info-box-label">Solution to Aliasing</span>
+        <p>Antialiasing changes the colour of pixels <em>surrounding</em> the edges of lines to varying shades (grey or blended colour) to smooth the sharp edge into the background, giving the appearance of a finer resolution.</p>
+      </div>
+
+      <h4>Hard-Copy Devices</h4>
+      <ul class="notes-list">
+        <li><strong>Vector Plotters</strong> — draw lines by physically moving a pen; high precision for technical drawings.</li>
+        <li><strong>Raster Plotters</strong> — inkjet or laser based; can produce shaded/coloured output.</li>
+      </ul>
+    </div>
+
+    <div class="section" id="ch4-2d">
+      <h3>2D Computer Graphics Pipeline</h3>
+      <p>Even though a model may be 3D, a VDU (Visual Display Unit) is a 2D device. The pipeline converts the model to a displayable 2D image:</p>
+      <div class="flow">
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Vector Generation</strong> — convert model to series of line segments (tolerance-controlled)</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Windowing</strong> — select portion of model space (World Coordinate System) to display</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Clipping</strong> — discard geometry outside the window boundary</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Viewport Transformation</strong> — map window to viewport (screen area)</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Display</strong> — instruct device to draw the resulting lines</div></div>
+      </div>
+
+      <h4>Windowing Transformation</h4>
+      <p>Maps the selected window in World Coordinates (WC) to the Viewport in Screen/Device Coordinates (DC):</p>
+      <div class="formula">
+        <div class="formula-label">Viewport mapping</div>
+        xDC = xDCmin + (xWC − xWCmin) × (xDCmax − xDCmin) / (xWCmax − xWCmin)
+        yDC = yDCmin + (yWC − yWCmin) × (yDCmax − yDCmin) / (yWCmax − yWCmin)
+      </div>
+    </div>
+
+    <div class="section" id="ch4-3d">
+      <h3>3D Computer Graphics — Viewing Transformations</h3>
+      <p>3D models must be transformed for display. Three fundamental transformations:</p>
+
+      <h4>1. Rotation</h4>
+      <p>Rotating a point in 2D anticlockwise by angle θ about the origin:</p>
+      <div class="formula">
+        x' = x·cos θ − y·sin θ
+        y' = x·sin θ + y·cos θ
+      </div>
+      <p>In matrix form:</p>
+      <div class="formula">
+        [x']   [cos θ  −sin θ] [x]
+        [y'] = [sin θ   cos θ] [y]
+      </div>
+      <p>For 3D rotation about the Z-axis the same 2D matrix applies to x,y while z remains unchanged. Separate matrices exist for rotation about X and Y axes.</p>
+
+      <h4>2. Scaling</h4>
+      <p>Scaling a point by factors Sx, Sy, Sz:</p>
+      <div class="formula">
+        x' = Sx · x
+        y' = Sy · y
+        z' = Sz · z
+
+        In matrix form: p' = S · p  where S = diag(Sx, Sy, Sz)
+      </div>
+      <p>Uniform scaling (Sx=Sy=Sz) preserves shape. Non-uniform scaling distorts the object.</p>
+
+      <h4>3. Translation</h4>
+      <p>Moving a point by displacement (dx, dy, dz):</p>
+      <div class="formula">
+        x' = x + dx
+        y' = y + dy
+        z' = z + dz
+      </div>
+      <p>In homogeneous coordinates (4×4 matrix) all three transformations can be combined into a single matrix multiplication — this is why homogeneous coordinates are used in all modern graphics pipelines.</p>
+
+      <h4>Hardware for User Interaction</h4>
+      <p>Two categories of input devices:</p>
+      <ul class="notes-list">
+        <li><strong>Positioning Devices</strong> — for entering coordinate positions (mouse, trackball, digitising tablet, joystick). Position is reflected in a screen <strong>cursor</strong> (cross-hair). A button confirms the position.</li>
+        <li><strong>Pointing/Picking Devices</strong> — for selecting graphical elements on screen. The light pen (historical) directly pointed at illuminated elements. Today, selection is done by indicating a screen position and software finding the nearest element.</li>
+      </ul>
+    </div>
+
+    <!-- Ch4 Q&A -->
+    <div class="section" id="ch4-qa">
+      <h3>Questions &amp; Answers — Chapter 4</h3>
+      <div class="qa-section">
+        <div class="qa-header"><span>Exam Practice Q&amp;A</span></div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is the staircasing effect and how is it overcome?</div>
+          <div class="qa-a">The <strong>staircasing (aliasing) effect</strong> is the stair-stepped appearance of diagonal lines and curves on a raster display, caused by the discrete pixel grid — the finite resolution cannot exactly represent continuous geometry. It is overcome by <strong>antialiasing</strong>: the pixels surrounding the line edge are rendered at intermediate intensity values (blended colours) to create the visual impression of a smoother transition.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Describe the steps in the 2D CAD graphics pipeline.</div>
+          <div class="qa-a">The steps are: (1) <strong>Convert model</strong> geometry into a series of line segments (with tolerance controlling approximation quality for curves). (2) <strong>Windowing</strong> — select the area of the model to be displayed. (3) <strong>Clipping</strong> — discard all geometry outside the window boundary. (4) <strong>Viewport transformation</strong> — map the window coordinates to screen/device coordinates. (5) <strong>Display</strong> — send draw commands to the display device.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Derive the 2D rotation matrix for anticlockwise rotation by angle θ.</div>
+          <div class="qa-a">Start with: new x' = x·cosθ − y·sinθ; new y' = x·sinθ + y·cosθ. In matrix form: [x'; y'] = [[cosθ, −sinθ]; [sinθ, cosθ]] × [x; y]. This matrix is orthogonal (its inverse equals its transpose), confirming it is a pure rotation.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is the difference between vector and raster graphics?</div>
+          <div class="qa-a"><strong>Vector graphics</strong> represent images as geometric descriptions (lines, curves, shapes defined by coordinates and equations). They are resolution-independent — can be scaled to any size without loss of quality. <strong>Raster graphics</strong> represent images as rectangular arrays of pixels (colour values). They are resolution-dependent — quality degrades on scaling. Vector graphics are preferred for CAD; raster graphics are standard for photographs and screen display.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Explain the difference between positioning devices and pointing devices in CAD interaction.</div>
+          <div class="qa-a"><strong>Positioning devices</strong> (mouse, trackball, digitising tablet) are used to input coordinate locations within the CAD model. The screen cursor reflects device position; a button click confirms the location. <strong>Pointing/picking devices</strong> are used to select existing graphical elements (objects, lines, commands) on screen. Historically the light pen was used; today software identifies the nearest entity to a cursor position indicated by a positioning device.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">A point P=(3,4) is scaled by Sx=2, Sy=0.5. Find the new coordinates.</div>
+          <div class="qa-a">x' = 2 × 3 = <strong>6</strong>; y' = 0.5 × 4 = <strong>2</strong>. New point P' = (6, 2).</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="chapter-divider" data-text="END OF CHAPTER 4">
+
+    <!-- ══════════════════════════════════════ -->
+    <!--  CHAPTER 5                             -->
+    <!-- ══════════════════════════════════════ -->
+    <div id="ch5-transform" class="chapter-header">
+      <span class="chapter-tag">Chapter 05</span>
+      <h2>Entity Manipulation</h2>
+      <p class="chapter-intro">How CAD systems allow designers to create, modify, organise, and manage geometric entities through transformations, editing operations, and intelligent data structures.</p>
+    </div>
+
+    <div class="section">
+      <h3>Introduction to Entity Manipulation</h3>
+      <p>Traditional manual drawing modification is extremely difficult and time-consuming. CAD provides powerful facilities for:</p>
+      <ul class="notes-list">
+        <li><strong>Transformation</strong> — translation, rotation, scaling (move or copy geometry)</li>
+        <li><strong>Editing</strong> — trim and extend geometry</li>
+        <li><strong>Deletion</strong> — temporary (undo) or permanent removal</li>
+        <li><strong>Grouping</strong> — collecting entities into blocks/groups</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>Object Transformation</h3>
+      <p>In object transformation, the <strong>coordinate system is stationary</strong> and entities in the CAD model are moved or copied to different locations. (This is opposite to view transformation, where the model is fixed and the viewpoint moves.)</p>
+
+      <h4>Rotation About an Arbitrary Point</h4>
+      <p>To rotate about a point other than the origin:</p>
+      <div class="flow">
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Translate</strong> — move the rotation centre to the origin</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Rotate</strong> — apply rotation matrix about origin</div></div>
+        <div class="flow-item"><div class="flow-dot"></div><div class="flow-label"><strong>Translate back</strong> — move the rotation centre back to its original position</div></div>
+      </div>
+
+      <h4>Mirroring</h4>
+      <p>Mirroring reflects entities about a specified line (axis). To mirror about a line at angle α passing through point (a,b):</p>
+      <ul class="notes-list">
+        <li>Translate to move (a,b) to origin</li>
+        <li>Rotate by −α to align mirror line with x-axis</li>
+        <li>Scale by (1, −1) to reflect across x-axis</li>
+        <li>Rotate back by +α</li>
+        <li>Translate back to original position</li>
+      </ul>
+
+      <div class="hl"><strong>Example 5-1:</strong> Mirror three points through a line at 30° to the Ox axis with its origin at x=16, y=24. This requires the composite transformation sequence above applied to each point.</div>
+    </div>
+
+    <div class="section" id="ch5-trim">
+      <h3>Trim, Extend and Other Functions</h3>
+
+      <h4>Trim</h4>
+      <p>Shortens an entity (line, arc, curve) to a specified boundary — removes the portion beyond the cutting edge.</p>
+
+      <h4>Extend</h4>
+      <p>Lengthens an entity until it reaches a specified boundary.</p>
+
+      <div class="info-box warning">
+        <span class="info-box-label">Important Distinction</span>
+        <p>Trim and extend are <em>non-parametric</em> edits — they change the geometry of an entity. They are not the same as moving or copying (transformation).</p>
+      </div>
+
+      <h4>Other Key Functions</h4>
+      <div class="def-grid">
+        <div class="def-card"><div class="def-card-title">Deletion</div><p>Permanent removal of entities. Most systems also provide Undo/Redo for temporary deletion reversal.</p></div>
+        <div class="def-card"><div class="def-card-title">Group / Block</div><p>Collection of entities treated as a single entity for manipulation. Can be inserted multiple times as instances.</p></div>
+        <div class="def-card"><div class="def-card-title">Entity Property Modification</div><p>Change colour, line-style, layer, line weight of selected entities without changing geometry.</p></div>
+        <div class="def-card"><div class="def-card-title">Control Point Manipulation</div><p>Modify, add, or remove control points of Bézier and B-spline curves to reshape them.</p></div>
+      </div>
+    </div>
+
+    <div class="section" id="ch5-data">
+      <h3>Data Structures in CAD</h3>
+
+      <h4>Requirements</h4>
+      <ul class="notes-list">
+        <li>Support <strong>interactive manipulation</strong> — fast addition, modification, deletion</li>
+        <li>Support <strong>multiple data types</strong> — geometric, textual, dimensions, labels</li>
+        <li>Allow <strong>properties</strong> on geometric elements (line style, colour, pen number)</li>
+        <li>Allow <strong>associations</strong> between data elements</li>
+        <li>Support <strong>undo/redo</strong>, instancing, minimum storage</li>
+        <li>Garbage collection — reclaim memory from deleted entities</li>
+      </ul>
+
+      <h4>Constraints on Data Structure Design</h4>
+      <ul class="notes-list">
+        <li>Different entities need <strong>different amounts of storage</strong> (a point needs 3 floats; a spline needs many) → requires <strong>dynamic memory allocation</strong></li>
+        <li>Mix of data types: floating-point (coordinates) and integer (entity type, colour, number of knot points)</li>
+      </ul>
+
+      <h4>Typical Data Structure Organisation</h4>
+      <div class="info-box">
+        <span class="info-box-label">Architecture</span>
+        <p>A <strong>master entity table</strong> stores each entity with its type and <strong>pointers</strong> to separate arrays of integer and floating-point data. This allows arbitrary data sizes per entity while maintaining fast indexed access.</p>
+      </div>
+
+      <p>Example implementations:</p>
+      <ul class="notes-list">
+        <li>A <strong>line</strong>: real data for x,y,z coordinates of two endpoints; no integer data (beyond entity type).</li>
+        <li>A <strong>spline curve</strong>: integer table stores number of knot points; real data table stores curve parameters at each knot, segment coefficients, and coordinates.</li>
+        <li>Each entity stores pointers to the <strong>preceding and following entity</strong> in the linked list.</li>
+      </ul>
+    </div>
+
+    <div class="section" id="ch5-attr">
+      <h3>Associative Geometry and Attributes</h3>
+
+      <h4>Associative Geometry</h4>
+      <p>Associativity is the ability for modification of one entity to be automatically <strong>reflected in dependent entities</strong>. This is particularly important for:</p>
+      <ul class="notes-list">
+        <li><strong>Dimension updating</strong> — when geometry changes, associated dimension annotations update automatically.</li>
+        <li><strong>Assembly constraints</strong> — moving one component updates related mating components.</li>
+        <li><strong>Topological relationships</strong> in wire-frame and solid models must be stored with geometric data to maintain consistency.</li>
+      </ul>
+
+      <h4>Attributes (Non-Geometric Data)</h4>
+      <p>CAD systems allow <strong>non-geometric data</strong> to be associated with geometric entities through <strong>name-value pairs</strong>:</p>
+      <ul class="notes-list">
+        <li><strong>Name</strong>: a string of alphanumeric characters (e.g., "material", "supplier", "price")</li>
+        <li><strong>Value</strong>: a string or number (e.g., "Steel-304", "ACME Corp", 12.50)</li>
+      </ul>
+
+      <h4>Bill of Materials (BOM)</h4>
+      <p>A direct application of attributes — each component in an assembly has attributes like:</p>
+      <div class="tags">
+        <span class="tag">Part Number</span>
+        <span class="tag">Part Name</span>
+        <span class="tag">Quantity</span>
+        <span class="tag">Material</span>
+        <span class="tag">Supplier</span>
+        <span class="tag">Unit Price</span>
+        <span class="tag">Lead Time</span>
+      </div>
+      <p style="margin-top:0.75rem">The CAD system can automatically extract these attributes to generate a BOM report, directly linking design to procurement and manufacturing planning.</p>
+    </div>
+
+    <!-- Ch5 Q&A -->
+    <div class="section" id="ch5-qa">
+      <h3>Questions &amp; Answers — Chapter 5</h3>
+      <div class="qa-section">
+        <div class="qa-header"><span>Exam Practice Q&amp;A</span></div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is the difference between object transformation and view transformation?</div>
+          <div class="qa-a">In <strong>object transformation</strong>, the coordinate system is fixed and the geometric entities (objects) are moved, rotated, or scaled within it. In <strong>view transformation</strong>, the objects remain fixed in space and the viewpoint (camera) is moved/rotated to see them from different angles. CAD entity manipulation uses object transformation; 3D viewing uses view transformation.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">How is rotation about an arbitrary point (not the origin) performed?</div>
+          <div class="qa-a">Using a three-step composite transformation: (1) <strong>Translate</strong> the rotation centre point to the origin; (2) <strong>Apply the rotation matrix</strong> about the origin; (3) <strong>Translate back</strong> by the negative of the first translation. This is equivalent to a single composite transformation matrix T⁻¹ · R · T.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What are the requirements for a CAD data structure?</div>
+          <div class="qa-a">A CAD data structure must: support interactive addition, modification and deletion; handle multiple data types (geometry, text, dimensions); allow properties (colour, line style) to be assigned to entities; support associations between entities; handle undo/redo and instancing; minimise storage requirements; and provide garbage collection to reclaim memory from deleted entities.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Why is dynamic memory allocation necessary in CAD data structures?</div>
+          <div class="qa-a">Different geometric entities require different amounts of data: a point needs 3 float values; a line needs 6; a B-spline with n knot points needs 4n coefficients plus integer metadata. Static memory allocation would either waste memory (allocating maximum size for every entity) or limit the number of knot points allowed. Dynamic allocation gives exactly the memory needed for each entity type and size.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is associative geometry and why is it useful?</div>
+          <div class="qa-a">Associative geometry is the capability of a CAD system where modifying one entity automatically updates all dependent entities linked to it. It is useful because: dimension annotations automatically update when geometry changes (no manual re-dimensioning); assembly constraints propagate changes correctly; and topological consistency in solid models is maintained automatically, reducing errors and design iteration time.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What are attributes in CAD and how are they used for Bill of Materials generation?</div>
+          <div class="qa-a">Attributes are non-geometric data associated with geometric entities as name-value pairs (e.g., name="material", value="AISI 304 Steel"). For BOM generation, each component part in an assembly is given attributes for part number, name, quantity, material, supplier, and price. The CAD system queries these attributes across all components in the assembly and compiles them into a structured Bill of Materials table — directly linking design data to procurement and production planning without manual data entry.</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">Explain the difference between trim and extend operations in CAD.</div>
+          <div class="qa-a"><strong>Trim</strong> shortens an entity (line, arc, curve) by removing the portion that extends beyond a specified cutting boundary. <strong>Extend</strong> lengthens an entity until it reaches a specified target boundary. Both are editing operations that permanently modify the geometry of the entity (unlike transformations which move/copy without changing shape).</div>
+        </div>
+
+        <div class="qa-item">
+          <div class="qa-q">What is a group/block in CAD and what are its advantages?</div>
+          <div class="qa-a">A group (or block) is a named collection of entities that can be manipulated as a single entity. Advantages: (1) Simplifies repeated patterns — insert the block multiple times without recreating geometry. (2) Reduces model complexity — treat a complex sub-assembly as one object. (3) Enables instancing — multiple references to one definition, saving storage. (4) Editing the block definition automatically updates all instances.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="chapter-divider" data-text="END OF CHAPTER 5">
+
+    <!-- REFERENCE SECTION -->
+    <div class="chapter-header">
+      <span class="chapter-tag">Reference</span>
+      <h2>Quick Reference &amp; Key Formulas</h2>
+    </div>
+
+    <div class="section">
+      <h3>Essential Formulas Summary</h3>
+
+      <div class="formula">
+        <div class="formula-label">Euler's Rule (simple polyhedra)</div>
+        V − E + F = 2
+
+        <div class="formula-label" style="margin-top:1rem">Euler-Poincaré Formula</div>
+        V − E + F − H + 2P = 2B
+
+        <div class="formula-label" style="margin-top:1rem">Parametric Cubic Polynomial</div>
+        p(u) = k₀ + k₁u + k₂u² + k₃u³,   0 ≤ u ≤ 1
+
+        <div class="formula-label" style="margin-top:1rem">Bézier Curve (cubic)</div>
+        P(u) = (1−u)³P₀ + 3u(1−u)²P₁ + 3u²(1−u)P₂ + u³P₃
+
+        <div class="formula-label" style="margin-top:1rem">2D Rotation (anticlockwise by θ)</div>
+        x' = x·cosθ − y·sinθ
+        y' = x·sinθ + y·cosθ
+
+        <div class="formula-label" style="margin-top:1rem">Scaling</div>
+        x'=Sx·x,  y'=Sy·y,  z'=Sz·z
+
+        <div class="formula-label" style="margin-top:1rem">Translation</div>
+        x'=x+dx,  y'=y+dy,  z'=z+dz
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Key Terms Glossary</h3>
+      <div class="def-grid">
+        <div class="def-card"><div class="def-card-title">CAD</div><p>Computer-Aided Design — software tools for creating and analysing design models.</p></div>
+        <div class="def-card"><div class="def-card-title">CAM</div><p>Computer-Aided Manufacturing — computer control of manufacturing processes.</p></div>
+        <div class="def-card"><div class="def-card-title">Concurrent Engineering</div><p>Running design, analysis and manufacturing preparation in parallel, not sequentially.</p></div>
+        <div class="def-card"><div class="def-card-title">CSG</div><p>Constructive Solid Geometry — builds solids from primitives using boolean operations.</p></div>
+        <div class="def-card"><div class="def-card-title">B-Rep</div><p>Boundary Representation — defines a solid by its complete boundary (faces, edges, vertices).</p></div>
+        <div class="def-card"><div class="def-card-title">NURBS</div><p>Non-Uniform Rational B-Splines — the industry standard for curve and surface representation.</p></div>
+        <div class="def-card"><div class="def-card-title">Parametric Curve</div><p>Curve expressed as p(u) — x,y,z as functions of parameter u.</p></div>
+        <div class="def-card"><div class="def-card-title">Hermite Form</div><p>Cubic curve defined by 2 endpoints and 2 tangent vectors.</p></div>
+        <div class="def-card"><div class="def-card-title">Bézier Curve</div><p>Polynomial curve attracted toward but not passing through interior control points.</p></div>
+        <div class="def-card"><div class="def-card-title">B-Spline</div><p>Curve with local control — moving one control point only affects a local region.</p></div>
+        <div class="def-card"><div class="def-card-title">Antialiasing</div><p>Technique to smooth staircase effect on raster displays using blended pixel colours.</p></div>
+        <div class="def-card"><div class="def-card-title">Associative Geometry</div><p>Automatic update of dependent entities when one entity is modified.</p></div>
+        <div class="def-card"><div class="def-card-title">Coons Patch</div><p>Surface bounded by 4 curves, generated by linearly blending between them.</p></div>
+        <div class="def-card"><div class="def-card-title">BOM</div><p>Bill of Materials — structured list of components, quantities and attributes in an assembly.</p></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<a href="#top" class="back-top" title="Back to top">↑</a>
+
+<footer>
+  IPE-409 CAD/CAM · BUET · Study Notes · Reference: CAD/CAM Principles, Practice &amp; Manufacturing Management — McMohan &amp; Browne
+</footer>
+
+</body>
+</html>
